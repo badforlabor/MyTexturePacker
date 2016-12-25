@@ -153,11 +153,63 @@ namespace MyTexturePacker
                 int cnt = 0;
                 foreach (var file in files)
                 {
-                    Image sourceImg = Image.FromFile(file);
+                    Bitmap sourceImg = Image.FromFile(file) as Bitmap;
                     
                     if (sourceImg == null)
                         continue;
-                                       
+
+                    int skipY = 0;
+                    int skipX = 0;
+#if false
+                    // y轴方向过滤
+                    {
+                        bool find = false;
+                        for (int i = 0; i < sourceImg.Height; i++)
+                        {
+                            for (int j = 0; j < sourceImg.Width; j++)
+                            {
+                                Color c = sourceImg.GetPixel(j, i);
+                                if (!(c.R == 0 && c.G == 0 && c.B == 0 && c.A == 0))
+                                {
+                                    find = true;
+                                    break;
+                                }
+                            }
+                            if (!find)
+                            {
+                                skipY++;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    // x轴方向过滤
+                    {
+                        bool find = false;
+                        for (int j = 0; j < sourceImg.Width; j++)
+                        {
+                            for (int i = 0; i < sourceImg.Height; i++)
+                            {
+                                Color c = sourceImg.GetPixel(j, i);
+                                if (!(c.R == 0 && c.G == 0 && c.B == 0 && c.A == 0))
+                                {
+                                    find = true;
+                                    break;
+                                }
+                            }
+                            if (!find)
+                            {
+                                skipX++;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                    }
+#endif
 
                     if (p.X + MaxWidth > width)
                     {
@@ -179,8 +231,10 @@ namespace MyTexturePacker
                     tp.Y += (MaxHeight - sourceImg.Height) / 2;
 
 #else // lefttop
-//                     tp.X += (MaxWidth - sourceImg.Width) / 2;
-//                     tp.Y += (MaxHeight - sourceImg.Height) / 2;
+                    //                     tp.X += (MaxWidth - sourceImg.Width) / 2;
+                    //                     tp.Y += (MaxHeight - sourceImg.Height) / 2;
+                    tp.X -= skipX;
+                    tp.Y -= skipY;
 #endif
                     g.DrawImage(sourceImg, tp);
                     cnt++;
